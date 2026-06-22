@@ -74,7 +74,15 @@ jobs:
       - name: Rename APK with version
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          mv android/app/build/outputs/apk/release/app-release.apk "android/app/build/outputs/apk/release/RocDex-v${VERSION}.apk"
+          APK=$(find android -name "*.apk" -type f | head -1)
+          if [ -n "$APK" ]; then
+            DIR=$(dirname "$APK")
+            mv "$APK" "$DIR/RocDex-v${VERSION}.apk"
+            echo "Renamed to $DIR/RocDex-v${VERSION}.apk"
+          else
+            echo "No APK found"
+            exit 1
+          fi
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

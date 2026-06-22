@@ -58,7 +58,15 @@ jobs:
       - name: Rename APK
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          cp android/app/build/outputs/apk/release/app-release.apk "RocDex-v${VERSION}.apk"
+          find android -name "*.apk" -type f | head -5
+          APK=$(find android -name "*.apk" -type f | head -1)
+          if [ -n "$APK" ]; then
+            cp "$APK" "RocDex-v${VERSION}.apk"
+            echo "Copied $APK to RocDex-v${VERSION}.apk"
+          else
+            echo "No APK found"
+            exit 1
+          fi
 
       - name: Get tag name
         run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
