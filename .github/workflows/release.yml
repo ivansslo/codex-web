@@ -1,4 +1,4 @@
-name: Release RocDex APK
+name: Release Codex Web APK
 
 on:
   push:
@@ -61,8 +61,8 @@ jobs:
           find android -name "*.apk" -type f | head -5
           APK=$(find android -name "*.apk" -type f | head -1)
           if [ -n "$APK" ]; then
-            cp "$APK" "RocDex-v${VERSION}.apk"
-            echo "Copied $APK to RocDex-v${VERSION}.apk"
+            cp "$APK" "CodexWebLocal-v${VERSION}.apk"
+            echo "Copied $APK to CodexWebLocal-v${VERSION}.apk"
           else
             echo "No APK found"
             exit 1
@@ -75,12 +75,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
-          name: "RocDex ${{ env.TAG }}"
+          name: "Codex Web Local ${{ env.TAG }}"
           body: |
-            ## RocDex APK Release
-            
+            ## Codex Web Local APK Release
+
             - Version: ${{ env.TAG }}
             - Build: Automatic from GitHub Actions
-          files: RocDex-*.apk
+            - Server runs on localhost with local password access
+            - Settings gear icon to view server info
+          files: CodexWebLocal-*.apk
           draft: false
           prerelease: false
