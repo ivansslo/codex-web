@@ -42,7 +42,7 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install Node dependencies
-        run: pnpm install
+        run: pnpm install --ignore-scripts
 
       - name: Build frontend (Vue) and CLI
         run: pnpm run build

@@ -31,7 +31,7 @@ jobs:
         run: npm install -g pnpm
 
       - name: Install Node dependencies
-        run: pnpm install
+        run: pnpm install --ignore-scripts
 
       - name: Build frontend and CLI
         run: pnpm run build
