@@ -10,9 +10,6 @@ android {
     defaultConfig {
         applicationId = "com.rocdex.mobile"
         minSdk = 24
-        // targetSdk 33 required for Google Play compliance.
-        
-        // Termux (F-Droid) uses the same approach.
         targetSdk = 33
         versionCode = 1
         versionName = "1.0.90"

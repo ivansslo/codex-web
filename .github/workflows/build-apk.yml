@@ -1,4 +1,4 @@
-name: Build RocDex APK
+name: Build Codex Web APK
 
 on:
   push:
@@ -77,8 +77,8 @@ jobs:
           APK=$(find android -name "*.apk" -type f | head -1)
           if [ -n "$APK" ]; then
             DIR=$(dirname "$APK")
-            mv "$APK" "$DIR/RocDex-v${VERSION}.apk"
-            echo "Renamed to $DIR/RocDex-v${VERSION}.apk"
+            mv "$APK" "$DIR/CodexWebLocal-v${VERSION}.apk"
+            echo "Renamed to $DIR/CodexWebLocal-v${VERSION}.apk"
           else
             echo "No APK found"
             exit 1
@@ -87,8 +87,8 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RocDex-APK
-          path: android/app/build/outputs/apk/release/RocDex-*.apk
+          name: CodexWebLocal-APK
+          path: android/app/build/outputs/apk/release/CodexWebLocal-*.apk
 
       - name: Check APK size
-        run: ls -lh android/app/build/outputs/apk/release/RocDex-*.apk
+        run: ls -lh android/app/build/outputs/apk/release/CodexWebLocal-*.apk
