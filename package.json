@@ -45,5 +45,12 @@
     "dist",
     "dist-cli",
     "src"
-  ]
+  ],
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "node-pty",
+      "node-pty-prebuilt-multiarch"
+    ]
+  }
 }
