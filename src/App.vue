@@ -271,7 +271,6 @@
                   <option value="openrouter">OpenRouter</option>
                   <option value="openai">OpenAI</option>
                   <option value="opencode-zen">OpenCode Zen</option>
-                  <option value="custom">Custom endpoint</option>
                 </select>
               </div>
               <div v-if="providerError" class="sidebar-settings-row sidebar-settings-error">
@@ -392,55 +391,7 @@
                 </div>
                 <p class="sidebar-settings-helper">{{ t('OpenAI uses Chat Completions mode by default.') }}</p>
               </div>
-              <div v-if="selectedProvider === 'custom'" class="sidebar-settings-row sidebar-settings-row--input">
-                <span class="sidebar-settings-label">{{ t('Custom endpoint URL') }}</span>
-                <div class="sidebar-settings-key-group">
-                  <input
-                    v-model="customEndpointUrl"
-                    class="sidebar-settings-key-input"
-                    type="url"
-                    :placeholder="t('https://api.example.com/v1')"
-                    @keydown.enter="saveCustomEndpoint"
-                  />
-                </div>
-                <span class="sidebar-settings-label" style="margin-top: 4px">{{ t('API key') }}</span>
-                <div class="sidebar-settings-key-group">
-                  <input
-                    v-model="customEndpointKey"
-                    class="sidebar-settings-key-input"
-                    type="password"
-                    :placeholder="t('Bearer token (optional)')"
-                    @keydown.enter="saveCustomEndpoint"
-                  />
-                  <button
-                    class="sidebar-settings-key-save"
-                    type="button"
-                    :disabled="freeModeCustomKeySaving || !customEndpointUrl.trim()"
-                    @click="saveCustomEndpoint"
-                  >{{ freeModeCustomKeySaving ? '...' : t('Save') }}</button>
-                </div>
-                <div class="sidebar-settings-row sidebar-settings-row--select" style="margin-top: 4px; padding: 0">
-                  <span class="sidebar-settings-label">{{ t('API format') }}</span>
-                  <div class="sidebar-settings-segmented" role="group" :aria-label="t('Custom endpoint API format')">
-                    <button
-                      type="button"
-                      class="sidebar-settings-segmented-option"
-                      :class="{ 'is-active': customEndpointWireApi === 'responses' }"
-                      @click="customEndpointWireApi = 'responses'"
-                    >
-                      Responses
-                    </button>
-                    <button
-                      type="button"
-                      class="sidebar-settings-segmented-option"
-                      :class="{ 'is-active': customEndpointWireApi === 'chat' }"
-                      @click="customEndpointWireApi = 'chat'"
-                    >
-                      Completions
-                    </button>
-                  </div>
-                </div>
-              </div>
+
               <div class="sidebar-settings-row sidebar-settings-row--select" :title="SETTINGS_HELP.dictationLanguage">
                 <span class="sidebar-settings-label">{{ t('Dictation language') }}</span>
                 <ComposerDropdown
@@ -1587,12 +1538,10 @@ const freeModeHasCustomKey = ref(false)
 const freeModeCustomKeyMasked = ref<string | null>(null)
 const freeModeCustomKeySaving = ref(false)
 const providerError = ref('')
-const selectedProvider = ref<'codex' | 'openrouter' | 'openai' | 'opencode-zen' | 'custom'>('codex')
-const customEndpointUrl = ref('')
-const customEndpointKey = ref('')
-const customEndpointWireApi = ref<'responses' | 'chat'>('responses')
+const selectedProvider = ref<'codex' | 'openrouter' | 'openai' | 'opencode-zen'>('codex')
+
 const openRouterWireApi = ref<'responses' | 'chat'>('responses')
-const openAiKey = ref('')
+const openAiKey = ref('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')
 const opencodeZenKey = ref('')
 const isTelegramConfigOpen = ref(false)
 const telegramBotTokenDraft = ref('')
@@ -4089,14 +4038,6 @@ async function onProviderChange(provider: string): Promise<void> {
         provider: 'opencode-zen',
       })
       freeModeEnabled.value = true
-    } else if (provider === 'custom') {
-      selectedProvider.value = 'custom'
-      if (customEndpointUrl.value.trim() && customEndpointKey.value.trim()) {
-        await setCustomProvider(customEndpointUrl.value.trim(), customEndpointKey.value.trim(), {
-          wireApi: customEndpointWireApi.value,
-        })
-        freeModeEnabled.value = true
-      }
     }
     providerError.value = ''
     await refreshAll({ includeSelectedThreadMessages: false, providerChanged: true, awaitAncillaryRefreshes: true })
@@ -4107,24 +4048,7 @@ async function onProviderChange(provider: string): Promise<void> {
   }
 }
 
-async function saveCustomEndpoint(): Promise<void> {
-  if (freeModeCustomKeySaving.value) return
-  const url = customEndpointUrl.value.trim()
-  if (!url) return
-  freeModeCustomKeySaving.value = true
-  try {
-    providerError.value = ''
-    await setCustomProvider(url, customEndpointKey.value.trim(), {
-      wireApi: customEndpointWireApi.value,
-    })
-    freeModeEnabled.value = true
-    await refreshAll({ includeSelectedThreadMessages: false, providerChanged: true, awaitAncillaryRefreshes: true })
-  } catch (err) {
-    providerError.value = err instanceof Error ? err.message : 'Failed to save custom endpoint'
-  } finally {
-    freeModeCustomKeySaving.value = false
-  }
-}
+
 
 async function setOpenRouterWireApi(nextWireApi: 'responses' | 'chat'): Promise<void> {
   if (freeModeCustomKeySaving.value || freeModeLoading.value) return
@@ -4231,10 +4155,6 @@ async function loadFreeModeStatus(): Promise<void> {
         selectedProvider.value = 'opencode-zen'
       } else if (status.provider === 'openai') {
         selectedProvider.value = 'openai'
-      } else if (status.provider === 'custom') {
-        selectedProvider.value = 'custom'
-        customEndpointUrl.value = status.customBaseUrl ?? ''
-        customEndpointWireApi.value = status.wireApi === 'chat' ? 'chat' : 'responses'
       } else {
         selectedProvider.value = 'openrouter'
         openRouterWireApi.value = status.wireApi === 'chat' ? 'chat' : 'responses'

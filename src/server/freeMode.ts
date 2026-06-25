@@ -150,10 +150,8 @@ export const FREE_MODE_DEFAULT_MODEL = 'openrouter/free'
 
 export const FREE_MODE_STATE_FILE = 'webui-custom-providers.json'
 
-export const CUSTOM_PROVIDER_ID = 'custom-endpoint'
 export const OPENCODE_ZEN_PROVIDER_ID = 'opencode-zen'
 export const OPENAI_PROVIDER_ID = 'openai'
-const CUSTOM_RUNTIME_PROVIDER_ID = 'custom_endpoint'
 const OPENCODE_ZEN_RUNTIME_PROVIDER_ID = 'opencode_zen'
 const OPENAI_RUNTIME_PROVIDER_ID = 'openai_chat'
 export const OPENCODE_ZEN_BASE_URL = 'https://opencode.ai/zen/v1'
@@ -168,8 +166,7 @@ export interface FreeModeState {
   apiKey: string | null
   model: string
   customKey?: boolean
-  provider?: 'openrouter' | 'custom' | 'opencode-zen' | 'openai'
-  customBaseUrl?: string
+  provider?: 'openrouter' | 'opencode-zen' | 'openai'
   wireApi?: WireApi
   providerKeys?: Record<string, string>
 }
@@ -214,7 +211,6 @@ export function shouldSuppressCommunityFreeModeForCodexAuth(
   hasUsableCodexAuth: boolean,
 ): boolean {
   if (!hasUsableCodexAuth || !current?.enabled) return false
-  if (current.provider === 'custom') return false
   if (current.customKey === true) return false
   if (current.provider === 'opencode-zen' && current.apiKey?.trim()) return false
   return current.provider === 'openrouter' || current.provider === 'opencode-zen' || !current.provider
@@ -237,10 +233,6 @@ export function getFreeModeEnvVars(state: FreeModeState): Record<string, string>
 
   if (state.provider === 'openai' && state.apiKey) {
     return { OPENAI_API_KEY: state.apiKey }
-  }
-
-  if (state.provider === 'custom' && state.customBaseUrl && state.apiKey) {
-    return { CUSTOM_ENDPOINT_API_KEY: state.apiKey }
   }
 
   return {}
@@ -307,28 +299,6 @@ export function getFreeModeConfigArgs(state: FreeModeState, serverPort?: number)
       '-c', `model="${model}"`,
       '-c', `model_provider="${OPENAI_RUNTIME_PROVIDER_ID}"`,
       ...getOpenAiProviderConfigArgs(serverPort),
-    ]
-  }
-
-  if (state.provider === 'custom' && state.customBaseUrl) {
-    const providerConfigKey = `model_providers.${CUSTOM_RUNTIME_PROVIDER_ID}`
-    const baseUrl = serverPort
-      ? `http://127.0.0.1:${serverPort}/codex-api/custom-proxy/v1`
-      : state.customBaseUrl
-    const wireApi = serverPort ? 'responses' : (state.wireApi || 'responses')
-    const authArgs: string[] = serverPort
-      ? ['-c', `${providerConfigKey}.experimental_bearer_token="custom-proxy-token"`]
-      : ['-c', `${providerConfigKey}.env_key="CUSTOM_ENDPOINT_API_KEY"`]
-    const modelArgs: string[] = state.model?.trim()
-      ? ['-c', `model="${state.model.trim()}"`]
-      : []
-    return [
-      ...modelArgs,
-      '-c', `model_provider="${CUSTOM_RUNTIME_PROVIDER_ID}"`,
-      '-c', `${providerConfigKey}.name="Custom Endpoint"`,
-      '-c', `${providerConfigKey}.base_url="${baseUrl}"`,
-      '-c', `${providerConfigKey}.wire_api="${wireApi}"`,
-      ...authArgs,
     ]
   }
 
