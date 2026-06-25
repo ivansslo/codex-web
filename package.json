@@ -4,14 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/ensure-codex-cli.cjs && vite",
     "build:frontend": "vite build",
     "build:cli": "tsup",
     "build": "npm run build:frontend && npm run build:cli",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "setup:codex": "node scripts/ensure-codex-cli.cjs"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",

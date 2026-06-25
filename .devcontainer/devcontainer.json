@@ -1,0 +1,9 @@
+{
+  "name": "codex-web",
+  "postCreateCommand": "npm install && npm run setup:codex",
+  "customizations": {
+    "vscode": {
+      "extensions": []
+    }
+  }
+}

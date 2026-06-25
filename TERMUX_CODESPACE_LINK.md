@@ -127,3 +127,30 @@ Kalau ingin machine lebih kecil:
 ```bash
 MACHINE=basicLinux32gb ./termux-create-new-codespace.sh
 ```
+
+## Fix error: Codex CLI not found
+
+Kalau halaman menampilkan:
+
+```text
+Codex CLI not found. Install @openai/codex or set CODEXUI_CODEX_COMMAND.
+```
+
+Jalankan di terminal Codespace:
+
+```bash
+cd /workspaces/codex-web
+git pull
+npm install
+npm run setup:codex
+npm run dev -- --host 0.0.0.0
+```
+
+Atau manual:
+
+```bash
+npm install -g @openai/codex
+codex --version
+```
+
+Setelah itu refresh browser Android.
