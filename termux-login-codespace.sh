@@ -17,6 +17,7 @@ set -euo pipefail
 
 CODESPACE_NAME="${CODESPACE_NAME:-codex-web-termux-jjwrqxjpr577cw94}"
 REPO="${REPO:-ivansslo/codex-web}"
+CODESPACE_WEB_URL="${CODESPACE_WEB_URL:-https://codex-web-termux-jjwrqxjpr577cw94.github.dev}"
 
 info() { printf '\033[1;34m[info]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[warn]\033[0m %s\n' "$*"; }
@@ -64,6 +65,7 @@ fi
 info "GitHub auth OK."
 info "Target repo: ${REPO}"
 info "Target codespace: ${CODESPACE_NAME}"
+info "Web link: ${CODESPACE_WEB_URL}"
 
 if ! gh codespace list --repo "$REPO" --json name --jq '.[].name' | grep -Fxq "$CODESPACE_NAME"; then
   warn "Codespace ${CODESPACE_NAME} tidak ditemukan untuk repo ${REPO}."
@@ -82,5 +84,7 @@ if [ "${STATE}" != "Available" ]; then
 fi
 
 info "Masuk terminal Codespace via SSH..."
+info "Kalau ingin buka via browser Android: ${CODESPACE_WEB_URL}"
+info "Kalau Termux punya termux-open-url: termux-open-url ${CODESPACE_WEB_URL}"
 info "Kalau muncul prompt fingerprint SSH, ketik: yes"
 exec gh codespace ssh -c "$CODESPACE_NAME"
