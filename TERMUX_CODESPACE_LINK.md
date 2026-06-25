@@ -50,3 +50,39 @@ git pull
 npm install
 npm run dev
 ```
+
+## Membuka localhost Codespace di browser Android
+
+Kalau server dev berjalan di Codespace, misalnya Vite port `5173`, jalankan server di terminal Codespace:
+
+```bash
+cd /workspaces/codex-web
+npm install
+npm run dev -- --host 0.0.0.0
+```
+
+Lalu dari Termux Android, forward port Codespace ke localhost Android:
+
+```bash
+curl -L -o termux-open-codespace-localhost.sh https://raw.githubusercontent.com/ivansslo/codex-web/main/termux-open-codespace-localhost.sh
+chmod +x termux-open-codespace-localhost.sh
+./termux-open-codespace-localhost.sh
+```
+
+Browser Android akan dibuka ke:
+
+```text
+http://127.0.0.1:5173
+```
+
+Alternatif manual:
+
+```bash
+gh codespace ports forward 5173:5173 -c codex-web-termux-jjwrqxjpr577cw94
+```
+
+Lalu buka di browser Android:
+
+```text
+http://127.0.0.1:5173
+```
