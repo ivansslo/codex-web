@@ -1950,7 +1950,11 @@ export async function setCustomProvider(
       provider: options?.provider,
     }),
   })
-  return await response.json() as { ok: boolean }
+  const payload = await response.json() as { ok?: boolean; error?: string }
+  if (!response.ok) {
+    throw new Error(payload.error || 'Failed to save provider config')
+  }
+  return payload as { ok: boolean }
 }
 
 async function fetchProviderModelIds(providerId?: string): Promise<{ ids: string[], exclusive: boolean } | null> {

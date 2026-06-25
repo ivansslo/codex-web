@@ -16,6 +16,6 @@ export function handleOpenAiProxyRequest(
     responsesEndpoint: OPENAI_RESPONSES_ENDPOINT,
     chatCompletionsEndpoint: OPENAI_CHAT_COMPLETIONS_ENDPOINT,
     missingKeyMessage: 'Missing OpenAI API key',
-    allowToolFallbackToResponses: true,
+    allowToolFallbackToResponses: false,
   })
 }

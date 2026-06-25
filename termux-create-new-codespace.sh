@@ -65,45 +65,34 @@ info "Machine yang tersedia untuk repo ini:"
 gh api "repos/${REPO}/codespaces/machines" \
   --jq '.machines[] | "- \(.name): \(.display_name)"' || true
 
-PAYLOAD_FILE="${TMPDIR:-/tmp}/codespace-create-$$.json"
-cat > "$PAYLOAD_FILE" <<JSON
-{
-  "ref": "${BRANCH}",
-  "machine": "${MACHINE}",
-  "idle_timeout_minutes": ${IDLE_TIMEOUT_MINUTES},
-  "display_name": "${DISPLAY_NAME}"
-}
-JSON
-
 info "Membuat Codespace baru..."
-CREATE_RESPONSE="$(gh api -X POST "repos/${REPO}/codespaces" --input "$PAYLOAD_FILE")"
-rm -f "$PAYLOAD_FILE"
+CREATE_TSV="$(gh api -X POST "repos/${REPO}/codespaces" \
+  -f ref="$BRANCH" \
+  -f machine="$MACHINE" \
+  -F idle_timeout_minutes="$IDLE_TIMEOUT_MINUTES" \
+  -f display_name="$DISPLAY_NAME" \
+  --jq '[.name, (.web_url // "")] | @tsv')"
 
-CODESPACE_NAME="$(printf '%s' "$CREATE_RESPONSE" | gh api --input - --jq '.name' 2>/dev/null || true)"
-WEB_URL="$(printf '%s' "$CREATE_RESPONSE" | gh api --input - --jq '.web_url' 2>/dev/null || true)"
-
-# Fallback parser kalau gh api --input - tidak support di versi lama.
-if [ -z "$CODESPACE_NAME" ]; then
-  CODESPACE_NAME="$(printf '%s' "$CREATE_RESPONSE" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("name", ""))' 2>/dev/null || true)"
+CODESPACE_NAME="${CREATE_TSV%%$'\t'*}"
+if [ "$CODESPACE_NAME" = "$CREATE_TSV" ]; then
+  WEB_URL=""
+else
+  WEB_URL="${CREATE_TSV#*$'\t'}"
 fi
-if [ -z "$WEB_URL" ]; then
-  WEB_URL="$(printf '%s' "$CREATE_RESPONSE" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("web_url", ""))' 2>/dev/null || true)"
-fi
 
 if [ -z "$CODESPACE_NAME" ]; then
-  err "Gagal membaca nama Codespace dari response:"
-  printf '%s\n' "$CREATE_RESPONSE" >&2
+  err "Gagal membaca nama Codespace dari GitHub CLI."
   exit 1
 fi
 
 info "Codespace dibuat: ${CODESPACE_NAME}"
 [ -n "$WEB_URL" ] && info "Web URL: ${WEB_URL}"
 
-cat > "$CONFIG_FILE" <<EOF
+cat > "$CONFIG_FILE" <<EOF_CONFIG
 export CODESPACE_NAME='${CODESPACE_NAME}'
 export REPO='${REPO}'
 export CODESPACE_WEB_URL='${WEB_URL}'
-EOF
+EOF_CONFIG
 
 info "Config tersimpan: ${CONFIG_FILE}"
 info "Untuk pakai di script lain: source ${CONFIG_FILE}"

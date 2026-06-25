@@ -6359,6 +6359,10 @@ export function createCodexBridgeMiddleware(): CodexBridgeMiddleware {
               prevKeys[current.provider] = current.apiKey
             }
             const resolvedKey = apiKey || prevKeys[providerType] || ''
+            if (providerType === 'openai' && !resolvedKey) {
+              setJson(res, 400, { error: 'OpenAI API key is required' })
+              return
+            }
             if (resolvedKey) {
               prevKeys[providerType] = resolvedKey
             }
